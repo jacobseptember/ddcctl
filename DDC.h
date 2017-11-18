@@ -61,6 +61,8 @@
 #define BOTTOM_LEFT_SCREEN_PURITY 0xE8
 #define BOTTOM_RIGHT_SCREEN_PURITY 0xEB
 
+#define OSD 1
+
 
 struct DDCWriteCommand
 {

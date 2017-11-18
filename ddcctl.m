@@ -27,6 +27,7 @@ int blacklistedDeviceWithNumber;
 #endif
 #ifdef OSD
 bool useOsd;
+double osdTime;
 #endif
 
 
@@ -67,20 +68,24 @@ void setControl(CGDirectDisplayID cdisplay, uint control_id, uint new_value)
     }
 #ifdef OSD
     if (useOsd) {
-        NSString *OSDisplay = @"/Applications/OSDisplay.app/Contents/MacOS/OSDisplay";
+        NSString *OSDisplay = @"/Applications//Utilities/OSDisplay.app/Contents/MacOS/OSDisplay";
         switch (control_id) {
             case 16:
                 [NSTask launchedTaskWithLaunchPath:OSDisplay
                                          arguments:[NSArray arrayWithObjects:
                                                     @"-l", [NSString stringWithFormat:@"%u", new_value],
-                                                    @"-i", @"brightness", nil]];
+                                                    @"-i", @"brightness",
+                                                    @"-d", [NSString stringWithFormat:@"%1.2f", osdTime],
+                                                    nil]];
                 break;
                 
             case 18:
                 [NSTask launchedTaskWithLaunchPath:OSDisplay
                                          arguments:[NSArray arrayWithObjects:
                                                     @"-l", [NSString stringWithFormat:@"%u", new_value],
-                                                    @"-i", @"contrast", nil]];
+                                                    @"-i", @"contrast",
+                                                    @"-d", [NSString stringWithFormat:@"%1.2f", osdTime],
+                                                    nil]];
                 break;
                 
             default:
@@ -176,7 +181,7 @@ int main(int argc, const char * argv[])
         @"\t-c <1-..>  [contrast]\n"
         @"\t-rbc       [reset brightness and contrast]\n"
 #ifdef OSD
-        @"\t-O         [osd: needs external app 'OSDisplay']\n"
+        @"\t-O <1.0..60.0>  [osd: needs external app 'OSDisplay' (display time default 3)]\n"
 #endif
         @"\n"
         @"----- Settings that don\'t always work -----\n"
@@ -201,7 +206,6 @@ int main(int argc, const char * argv[])
         
         // Commandline Arguments
         NSMutableDictionary *actions = [[NSMutableDictionary alloc] init];
-        
         for (int i=1; i<argc; i++)
         {
             if (!strcmp(argv[i], "-d")) {
@@ -317,7 +321,10 @@ int main(int argc, const char * argv[])
             }
 #ifdef OSD
             else if (!strcmp(argv[i], "-O")) {
+                i++;
                 useOsd = YES;
+                if (i >= argc) break;
+                osdTime = atof(argv[i]);
             }
 #endif
 #ifdef TEST
